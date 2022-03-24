@@ -2,45 +2,45 @@
 <html>
   <head>
 
-    <title>Update this tite!!!!!</title>
+    <title>Adding Web Map Interactions</title>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.0/dist/leaflet.css"/>
 
-
     <style>
-    html { height:100%;}
+      html { height:100%;}
 
-    body {height:100%;padding: 0;
-      margin: 0;
-    }
-
-    #map {
-    width: 100%;
-     height: 100%;
-    }
-
-    .info {
-        z-index: 1000;
-        position: absolute;
-        right: 20px;
-        top: 20px;
-        padding: 6px 8px;
-        font: 14px Arial, Helvetica, sans-serif;
-        text-align: right;
-        background: white;
-        background: rgba(255, 255, 255, 0.8);
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-        border-radius: 5px;
-
-          }
-
-
-    .info h1 {
-        font-size: 16px;
-        margin: 0 0 5px;
-        color: #666666;
+      body {height:100%;padding: 0;
+        margin: 0;
         }
+
+        #map {
+        width: 100%;
+         height: 100%;
+        }
+
+/*This is the style of the Title box*/
+        .info {
+            z-index: 1000;
+            position: relative;
+            right: 10px;
+            top: 5px;
+            padding: 6px 8px;
+            font: 14px Arial, Helvetica, sans-serif;
+            text-align: right;
+            background: white;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 1.2);
+            border-radius: 10px;
+              }
+
+        .info h1 {
+            font-size: 16px;
+            margin: 0 0 555px;
+            color: #777777;
+            }
+
+/*This is the style of the legend box*/
         .legend {
         z-index: 1000;
         position: absolute;
@@ -52,17 +52,15 @@
         background: rgba(255, 255, 255, 0.8);
         box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
         border-radius: 5px;
-
-        }
-
-
-    .legend i {
-        width: 18px;
-        height: 16px;
-        float: left;
-        margin-right: 8px;
-        opacity: 0.7;
-        }
+            }
+/*This is the style of the legend markers*/
+        .legend i {
+            width: 18px;
+            height: 16px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+            }
 
     </style>
 
@@ -78,31 +76,34 @@
     <div class='legend'></div>
 
     <script>
-// 1. create the map object and the base layer.
-    var map = L.map('map').setView([37.8, -96], 5); //latlong coordinates centered over US
+// This is the map object layer
+    var map = L.map('map').setView([45, -116], 3); //latlong coordinates centered over US + AK/HI/PR
+// This is the base map layer
+//    L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png').addTo(map);
 
-    L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png').addTo(map);
-    // 2. Create the chorepleth map with interactive functions.
+var Stamen_TonerLite = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.{ext}', {
+	attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	subdomains: 'abcd',
+	minZoom: 0,
+	maxZoom: 20,
+	ext: 'png'
+}).addTo(map);
 
-    // determine the number of classes and their respective break values.
+// Chorepleth map with interactive functions
 
-    // the class breaks are listed below, there will be eight classes
+    // number of classes is 5 and values are based on jenks (natural breaks).
 
-    //starting with a class 1-10, and ending with a class 1000+
-
-    var grades = [2.7,5.3,6.8,8.3,9.6,10.9,12.2,13.5,14.9, 16.3,17.8,19.2,20.6,22,23.3,24.6,26.4,28.2,30.7,34,38.4,47.7];
+    var grades = [2, 10, 15, 25, 48];
 
 
-    // now determine the color ramp. The number of colors is determined by the number of classes.
+    // Color ramp. The number of colors is determined by the number of classes.
 
-    // try different interpolation method lch, lab, hsl
+    // tried different interpolation methods, lch, lab, hsl. Settled on color brewer colorblind frienly palette
 
-    // for example
-
-    var colors = chroma.scale(['green', 'red']).mode('hsl').colors(grades.length);
+    // var colors = chroma.scale(['#feebe2','#fbb4b9','#f768a1','#c51b8a','#7a0177']).mode('hsl').colors(grades.length);
 
     // or
-    // var colors = chroma.scale('OrRd').colors(grades.length);
+    var colors = chroma.scale(['#feebe2','#fbb4b9','#f768a1','#c51b8a','#7a0177']).colors(grades.length);
 
     function getColor(d) {
       for (var i = 0; i < grades.length - 1; i++) {
@@ -112,31 +113,29 @@
     }
 
     //determine the style class based on the input feature
-    //note, we are still working in section 2 here
     function style(feature) {
 
         return {
-              weight: 2,
+              weight: .5,
               opacity: 1,
-              color: 'green',
-              dashArray: '3',
-              fillOpacity: 0.7,
-              fillColor: getColor(feature.properties.Income.csv.PCTPOVALL)
+              color: 'black',
+              dashArray: '0',
+              fillOpacity: 0.9,
+// ********* need to change properties.?????
+              fillColor: getColor(feature.properties.PCTPOVALL)
         };
 
         }
 
-    // 3. add states file to the map
-    // 3.1 declare an empty GeoJSON object
+    // add states file to the map
+    // declare an empty GeoJSON object (why???)
 
-          var geojson = null;
+        //  var geojson = null;
 
           //now let's add interaction in the appropriate spot
-          //here's the code for our control, add to section 3.1
-          //paste into the script before section 3.2.1
+          //code for control
 
           var info = L.control();
-
 
           info.onAdd = function (map) {
               this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
@@ -146,20 +145,16 @@
           };
 
 
-          // method that we will use to update the control based on feature properties passed
-
           info.update = function (props) {
-              this._div.innerHTML = '<h4>Percent US Population in Poverty</h4>' +  (props ?
-                  '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
-                  : 'Hover over a state');
+              this._div.innerHTML = '<h2>US Population</h2>'+ 'Percent Living in Poverty'+ '</b><br />'  +  (props ?
+                  '<b>' + props.NAMELSAD + '</b><br />' + props.PCTPOVALL + ' % within county'
+                  : 'Hover over a county');
 
           };
 
-
-
           info.addTo(map);
 
-          // 3.2.1 highlight a feature when the mouse hovers on it.
+          //highlight a feature when the mouse hovers on it.
 
     function highlightFeature(e) {
 
@@ -170,29 +165,26 @@
           //the target captures the object that the event associates with
 
               layer.setStyle({
-                  weight: 8,
+                  weight: 2,
                   opacity: 0.8,
-                  color: '#e3e3e3',
-                  fillColor: '#1c5ee3',
-                  fillOpacity: 0.5
+                  color: 'blue',
+                  fillColor: 'gray',
+                  fillOpacity: 0.1
           });
 
           // then bring the layer to the front.
 
           layer.bringToFront();
 
-          // select the update class, and update the contet with the input value.
+          // select the update class, and update the content with the input value.
+          // remember whenever we call feature.properties, we're looking in the attributes
+          // for a particular layer - county name and percent poor Population, for example
 
-          // remember whenver we call feature.properties, we're looking in the attributes
-
-          // for a particular layer - state name and state density, for example
-
-          info.update(layer.feature.Income.csv.PCTPOVALL);
+          info.update(layer.feature.properties);
 
           }
 
-          //continuing in a new subsequent section
-          // 3.2.2 zoom to the highlighted feature when the mouse clicks it.
+          // zoom to the highlighted feature when the mouse clicks it.
 
       function zoomToFeature(e) {
 
@@ -202,7 +194,7 @@
 
           // now use on each feature option to add listeners on our state layers
 
-          // 3.2.3 reset the hightlighted feature when the mouse is out of its region.
+          //reset the hightlighted feature when the mouse is out of its region.
 
       function resetHighlight(e) {
 
@@ -211,8 +203,8 @@
           info.update();  //this line will be called later
 
           }
-          // 3.3 add these events to the layer object.
 
+//******* add more features!!!!!
       function onEachFeature(feature, layer) {
 
           layer.on({
@@ -224,26 +216,26 @@
 
           }
 
-// 3.4 assign the geojson data path, style option and onEachFeature option. And then Add the geojson layer to the map.
+// Add the geojson layer to the map.
+// Used "https://mapshaper.org/" to reduce the size of the geJson file
 
-          geojson = L.geoJson.ajax("assets/us-counties.geojson", {
+          geojson = L.geoJson.ajax("assets/map.geojson", {
               style: style,
               onEachFeature: onEachFeature
 
           }).addTo(map);
 
-          // 4. create the legend
+          // Create the legend. points back to line 88~ var 'grades'
 
           var labels = [];
 
           for (var i = 0; i < grades.length - 1; i++) {
-              labels.push('<i style="background:' + colors[i] + '"></i> ' + grades[i] + ' - ' + grades[i + 1]);
-
+              labels.push('<i style="background:' + colors[i] + '"></i> ' + grades[i] + ' - ' + grades[i + 1] + '%');
           }
-              labels.push('<i style="background:' + colors[grades.length - 1] + '"></i> ' + grades[grades.length - 1] + ' +');
+              labels.push('<i style="background:' + colors[grades.length - 1] + '"></i> ' + grades[grades.length - 1] + '%' + ' +');
               $(".legend").html(labels.join('<br>'));
 
-              // 5. create the credits
+              // create the credits
 
               map.attributionControl.addAttribution('Population data &copy; <a href="http://census.gov/">US Census Bureau</a> | This map is made by Jason Ehlenberger');
     </script>
