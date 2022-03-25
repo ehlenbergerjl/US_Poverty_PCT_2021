@@ -36,7 +36,7 @@
 
         .info h1 {
             font-size: 16px;
-            margin: 0 0 555px;
+            margin: 0 0 5px;
             color: #777777;
             }
 
@@ -93,7 +93,7 @@ var Stamen_TonerLite = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/to
 
     // number of classes is 5 and values are based on jenks (natural breaks).
 
-    var grades = [2, 10, 15, 25, 48];
+    var grades = [2, 10, 15, 25, 47.8];
 
 
     // Color ramp. The number of colors is determined by the number of classes.
@@ -145,7 +145,7 @@ var Stamen_TonerLite = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/to
 
 
           info.update = function (props) {
-              this._div.innerHTML = '<h2>US Population</h2>'+ 'Percent Living in Poverty'+ '</b><br />'  +  (props ?
+              this._div.innerHTML = '<h2>US Population</h2>' + '<b>Percent Living in Poverty' + '</b><br />'  +  (props ?
                   '<b>' + props.NAMELSAD + '</b><br />' + props.PCTPOVALL + ' % within county'
                   : 'Hover over a county');
 
